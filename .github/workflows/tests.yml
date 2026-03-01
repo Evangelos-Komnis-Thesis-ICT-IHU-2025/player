@@ -20,6 +20,8 @@ jobs:
     name: Node Build/Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - name: Checkout
@@ -34,8 +36,25 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage
+        run: |
+          npm run build
+          npx --yes c8 --reporter=lcov --reporter=text-summary npm run test:unit
 
       - name: Run lint
         run: npm run lint --if-present
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-coverage-lcov
+          path: coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Upload coverage to Codecov
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ env.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          flags: player
