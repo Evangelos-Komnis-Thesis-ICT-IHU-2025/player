@@ -1,0 +1,15 @@
+"bug":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'bug/**'
+      - '**/bug/**'
+"enhancement":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'enhancement/**'
+      - '**/enhancement/**'
+"documentation":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+      - '**/*.md'

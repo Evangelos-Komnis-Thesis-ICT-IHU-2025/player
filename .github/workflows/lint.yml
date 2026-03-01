@@ -1,0 +1,63 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript
+            setup: node
+            version: "20"
+            install: "npm ci --ignore-scripts || npm install --ignore-scripts"
+            lint: "npm run lint --if-present"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        if: matrix.setup == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.version }}"
+
+      - name: Setup Node.js
+        if: matrix.setup == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ matrix.version }}"
+
+      - name: Setup Go
+        if: matrix.setup == 'go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{ matrix.version }}"
+
+      - name: Setup Java
+        if: matrix.setup == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "${{ matrix.version }}"
+
+      - name: Setup Rust
+        if: matrix.setup == 'rust'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install lint dependencies
+        if: matrix.install != ''
+        run: ${{ matrix.install }}
+
+      - name: Run lint
+        run: ${{ matrix.lint }}
